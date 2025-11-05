@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Pagination from "../components/Pagination.jsx";
+import Pagination from "./Pagination.jsx";
 import {
   fetchLogs,
   setSearchTerm,

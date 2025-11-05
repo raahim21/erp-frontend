@@ -49,6 +49,13 @@ const UsersIcon = ({ className }) => ( // Users
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm6-11a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
 );
+
+const TruckIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${className || ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13h12v6H3v-6zm0-2h12V5H3v6zm12 0h6l3 3v5h-6v-8zM7 21a2 2 0 100-4 2 2 0 000 4zm14 0a2 2 0 100-4 2 2 0 000 4z" />
+    </svg>
+);
+
 const ChartBarIcon = ({ className }) => ( // Dashboard
     <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${className || ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -69,6 +76,13 @@ const MoonIcon = ({ className }) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
     </svg>
 );
+
+const LogsIcon = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${className || ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m-6-8h6M5 6h14M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+);
+
 const ChevronDownIcon = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 ${className || ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -172,6 +186,7 @@ const LeftNavbar = () => {
           {isAdmin && (
               <CollapsibleSection title="Admin" moduleName="users">
                   <NavLink to="/users/" icon={<UsersIcon />} onClick={closeMobileMenu}>Manage Users</NavLink>
+                  <NavLink to="/logs/" icon={<LogsIcon />} onClick={closeMobileMenu}>View Logs</NavLink>
               </CollapsibleSection>
           )}
       </nav>
