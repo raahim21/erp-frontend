@@ -12,7 +12,7 @@ import {
   setActiveFilter,
 } from "../Slices/IssueOrderSlice.jsx";
 import Spinner from "../components/Spinner.jsx";
-import Pagination from "../components/pagination.jsx";
+import Pagination from "../components/Pagination.jsx";
 import useDebounce from "../../utils/useDebounce.js";
 import FilterBox from "../components/FilterBox.jsx"; // Ensure this path is correct for your project structure
 

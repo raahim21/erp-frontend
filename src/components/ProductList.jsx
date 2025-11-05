@@ -12,7 +12,7 @@ import {
   setSearchTerm,
 } from "../Slices/InventorySlice.jsx";
 import Spinner from "../components/Spinner.jsx";
-import Pagination from "./pagination.jsx";
+import Pagination from "./Pagination.jsx";
 import FilterBox from "../components/FilterBox.jsx";
 import useDebounce from "../../utils/useDebounce.js";
 
