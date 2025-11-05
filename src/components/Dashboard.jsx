@@ -50,7 +50,6 @@ const Dashboard = () => {
       setStats(data);
     } catch (err) {
       console.error("Stats fetch error:", err);
-      setStatsError("Failed to load dashboard stats");
       toast.error("Failed to load dashboard stats");
     } finally {
       setIsStatsLoading(false);
@@ -129,6 +128,7 @@ const Dashboard = () => {
           <StatCard title="Total Issues" value={stats.issues?.totalIssues ?? 0} darkMode={darkMode} />
           <StatCard title="Products Issued" value={stats.issues?.totalProductsIssued ?? 0} darkMode={darkMode} />
           <StatCard title="Total Revenue" value={`$${stats.issues?.totalRevenue?.toFixed(2) ?? 0}`} darkMode={darkMode} />
+          <StatCard title="Total Profit" value={`$${stats.profit?.toFixed(2) ?? 0}`} darkMode={darkMode} />
         </div>
       )}
       
@@ -185,9 +185,13 @@ const Dashboard = () => {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="revenue" fill="#8884d8" name="Revenue ($)" />
-              <Bar dataKey="orders" fill="#82ca9d" name="Orders" />
-              {lastUsedParams?.includeProducts && <Bar dataKey="productsSold" fill="#ffc658" name="Products Sold" />}
+            
+
+
+                      <Bar dataKey="revenue" fill="#8884d8" name="Revenue ($)" />
+                        <Bar dataKey="orders" fill="#82ca9d" name="Orders" />
+                        {lastUsedParams?.includeProducts && <Bar dataKey="productsSold" fill="#ffc658" name="Products Sold" />}
+                        <Bar dataKey="profit" fill="#ff7f50" name="Profit ($)" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -197,3 +201,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+

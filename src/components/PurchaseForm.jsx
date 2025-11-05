@@ -120,6 +120,7 @@ const PurchaseForm = () => {
     toLocation: null,
     productId: null,
     quantity: "",
+    unitPrice:"",
     totalPrice: "",
     poNumber: "",
     notes: "",
@@ -174,6 +175,7 @@ const PurchaseForm = () => {
         quantity: purchase.quantity?.toString() || "",
         totalPrice: purchase.totalPrice?.toString() || "",
         poNumber: purchase.poNumber || "",
+        unitPrice:purchase.unitPrice || "",
         notes: purchase.notes || "",
         status: purchase.status || "Pending",
       });
@@ -202,6 +204,7 @@ const PurchaseForm = () => {
     e.preventDefault();
 
     if (!formData.productId?.value) return toast.error("Product is required.");
+    if(!formData.unitPrice && formData.type=='Vendor' || formData.type=='Internal' || parseInt(formData.unitPrice) < 1) return toast.warn('unitPrice cannot be 0 or empty')
     if (!formData.quantity || parseInt(formData.quantity) <= 0) return toast.error("Quantity must be a positive number.");
     
     switch (formData.type) {
@@ -238,11 +241,12 @@ const PurchaseForm = () => {
         fromLocation: formData.fromLocation?.value || null,
         toLocation: formData.toLocation?.value || null,
         productId: formData.productId.value,
-        quantity: parseInt(formData.quantity),
-        totalPrice: formData.type === 'Transfer' ? 0 : parseFloat(formData.totalPrice),
+        quantity: Number(parseInt(formData.quantity)),
+        totalPrice: formData.type === 'Transfer' ? 0 : Number(parseFloat(formData.totalPrice)),
         poNumber: formData.poNumber.trim(),
         notes: formData.notes.trim(),
         status: formData.status,
+        unitPrice:Number(parseFloat(formData.unitPrice)),
       };
 
       if (isEditMode) {
@@ -258,6 +262,19 @@ const PurchaseForm = () => {
     }
   };
   
+  useEffect(() => {
+  const quantity = parseFloat(formData.quantity) || 0;
+  const unitPrice = parseFloat(formData.unitPrice) || 0;
+  const total = quantity * unitPrice;
+  
+  // Fix: Format to match backend expectation (2 decimals, string)
+  setFormData(prev => ({
+    ...prev,
+    totalPrice: total.toFixed(2)  // "125.00" → parseFloat() = 125.00 ✅
+  }));
+}, [formData.quantity, formData.unitPrice]);
+
+
   const productInventory = selectedProduct?.inventory;
 
   const selectStyles = useMemo(() => ({
@@ -352,10 +369,28 @@ const PurchaseForm = () => {
                       <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} className={`w-full p-2 border rounded ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`} required min="1" />
                   </div>
                   {formData.type !== 'Transfer' && (
+                    <>
                     <div>
-                        <label className="block font-medium mb-1 dark:text-gray-300">Total Price (USD) <span className="text-red-500">*</span></label>
-                        <input type="number" name="totalPrice" value={formData.totalPrice} onChange={handleChange} className={`w-full p-2 border rounded ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`} required min="0" step="0.01" />
+                        <label className="block font-medium mb-1 dark:text-gray-300">Unit Price (USD) <span className="text-red-500">*</span></label>
+                        <input type="number" name="unitPrice" value={formData.unitPrice} onChange={handleChange} className={`w-full p-2 border rounded ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`} required min="1" step="0.01" />
                     </div>
+                    {/* <div>
+                        <label className="block font-medium mb-1 dark:text-gray-300">Total Price (USD) <span className="text-red-500">*</span></label>
+                        <input type="number" name="totalPrice" value={parseFloat(formData.quantity)*parseFloat(formData.unitPrice)} disabled onChange={handleChange} className={`w-full p-2 border rounded ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`} required min="0" step="1" />
+                    </div> */}
+                    <div>
+                  <label className="block font-medium mb-1 dark:text-gray-300">Total Price (USD) <span className="text-red-500">*</span></label>
+                  <input 
+                    type="number" 
+                    name="totalPrice" 
+                    value={formData.totalPrice}  // Use stored string value directly
+                    disabled 
+                    readOnly
+                    className={`w-full p-2 border rounded bg-gray-200 dark:bg-gray-600 cursor-not-allowed ${darkMode ? "border-gray-600 text-gray-300" : "border-gray-400 text-gray-500"}`} 
+                    step="0.01" 
+                  />
+                </div>
+                    </>
                   )}
               </div>
           </div>

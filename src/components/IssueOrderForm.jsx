@@ -36,7 +36,7 @@ const fetchCustomers = async (inputValue) => {
 
 const fetchProducts = async (inputValue) => {
   const data = await fetchWithAuth(`${API_BASE_URL}/api/products?search=${inputValue || ''}`);
-  return data.products.map((prod) => ({ label: prod.name, value: prod._id, price: prod.price || '' }));
+  return data.products.map((prod) => ({ label: prod.name, value: prod._id, sellingPrice: prod.sellingPrice || '' }));
 };
 
 // --- HELPER HOOKS ---
@@ -160,7 +160,6 @@ const IssueOrderForm = () => {
     useEffect(() => {
         if (isEditMode && user?.userId) {
             dispatch(fetchIssueOrderById({ id: orderId, user })).unwrap().catch(err => {
-                toast.error(err.message || "Failed to load issue order");
             });
         }
         return () => { dispatch(clearCurrentIssueOrder()); };
@@ -190,8 +189,8 @@ const IssueOrderForm = () => {
 
     const handleProductChange = useCallback((index, field, value) => {
         formDispatch({ type: 'SET_PRODUCT_FIELD', index, field, value });
-        if (field === 'productId' && value?.price) {
-            formDispatch({ type: 'SET_PRODUCT_FIELD', index, field: 'unitPrice', value: value.price });
+        if (field === 'productId' && value?.sellingPrice) {
+            formDispatch({ type: 'SET_PRODUCT_FIELD', index, field: 'unitPrice', value: value.sellingPrice });
         }
     }, []);
 
@@ -220,14 +219,12 @@ const IssueOrderForm = () => {
 
             if (isEditMode) {
                 await dispatch(updateIssueOrder({ id: orderId, issueOrderData, user })).unwrap();
-                toast.success("Issue Order updated!");
             } else {
                 await dispatch(addIssueOrder({ issueOrderData, user })).unwrap();
-                toast.success("Issue Order created!");
             }
             navigate("/ims/issue-orders");
         } catch (err) {
-            toast.error(err.message || `Failed to ${isEditMode ? "update" : "add"} issue order`);
+            
         } finally {
             setIsSaving(false);
         }

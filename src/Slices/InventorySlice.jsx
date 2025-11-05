@@ -9,7 +9,7 @@ const API_BASE = `${API_BASE_URL}/api/products`;
 const API_BRANDS = `${API_BASE_URL}/api/brands`;
 const API_CATEGORIES = `${API_BASE_URL}/api/categories`;
 const API_LOCATIONS = `${API_BASE_URL}/api/locations`;
-
+let abortController;
 /* ======================
    Products
    ====================== */
@@ -69,7 +69,6 @@ export const addProduct = createAsyncThunk(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...productData, userId: user.userId }),
       });
-      toast.success("Product created.");
       const { products } = getState().inventory;
       // refresh list
       await dispatch(fetchProducts({ page: products.currentPage || 1, limit: products.limit || 10, search: products.searchTerm || "", activeFilter: products.activeFilter || {}, user })).catch(()=>{});
@@ -92,7 +91,6 @@ export const updateProduct = createAsyncThunk(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...productData, userId: user.userId }),
       });
-      toast.success("Product updated.");
       const { products } = getState().inventory;
       await dispatch(fetchProducts({ page: products.currentPage || 1, limit: products.limit || 10, search: products.searchTerm || "", activeFilter: products.activeFilter || {}, user })).catch(()=>{});
       return res;
@@ -111,7 +109,6 @@ export const deleteProduct = createAsyncThunk(
       if (!user || !user.userId) return rejectWithValue("User not authenticated");
       // backend expected DELETE to soft-delete; if you prefer PATCH use appropriate route.
       await fetchWithAuth(`${API_BASE}/${id}`, { method: "DELETE" });
-      toast.success("Product archived.");
       const { products } = getState().inventory;
       await dispatch(fetchProducts({ page: products.currentPage || 1, limit: products.limit || 10, search: products.searchTerm || "", activeFilter: products.activeFilter || {}, user })).catch(()=>{});
       return id;
@@ -131,10 +128,12 @@ export const deleteProduct = createAsyncThunk(
 /* BRANDS */
 export const fetchBrands = createAsyncThunk(
   "inventory/fetchBrands",
-  async ({ search = "" } = {}, { rejectWithValue }) => {
+  async ({ search = "" } = {}, { rejectWithValue, signal }) => {
+    
     try {
       const params = new URLSearchParams({ search, isDeleted: "false" });
-      const res = await fetchWithAuth(`${API_BRANDS}?${params.toString()}`);
+      const res = await fetchWithAuth(`${API_BRANDS}?${params.toString()}`, {signal});
+      console.log(res)
       return res.brands || [];
     } catch (err) {
       const msg = err?.response?.data?.message || err.message || "Failed to fetch brands";
@@ -156,6 +155,9 @@ export const addBrand = createAsyncThunk(
       await dispatch(fetchBrands({ search: "" })).catch(()=>{});
       return res;
     } catch (err) {
+      if (signal.aborted) {
+        throw err; 
+      }
       const msg = err?.response?.data?.message || err.message || "Failed to add brand";
       toast.error(msg);
       return rejectWithValue(msg);

@@ -1,102 +1,3 @@
-// import React, { useState, useContext } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { useAuth } from "../context/AuthContext";
-// import { DarkModeContext } from "../context/DarkmodeContext.jsx";
-// import FullPageSpinner from "../components/FullPageSpinner.jsx";
-// import { fetchWithAuth } from "../../utils/fetchWithAuth.js";
-// import { API_BASE_URL } from "../../config.js";
-
-// const Login = () => {
-//   const { darkMode } = useContext(DarkModeContext);
-//   const { fetchUser, loading: authLoading } = useAuth();
-//   const navigate = useNavigate();
-
-//   const [formData, setFormData] = useState({ username: "", password: "" });
-//   const [error, setError] = useState(null);
-//   const [loginLoading, setLoginLoading] = useState(false);
-
-//   const handleChange = (e) =>
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setError(null);
-//     setLoginLoading(true);
-
-//     try {
-//       // FIX: Use the fetchWithAuth utility to ensure credentials (cookies) are handled correctly.
-//       await fetchWithAuth(`${API_BASE_URL}/api/auth/login`, {
-//         method: "POST",
-//         body: JSON.stringify(formData),
-//       });
-      
-//       await fetchUser(); // This will fetch and set the user context
-//       navigate("/dashboard"); // Navigate after successful login and user fetch
-//     } catch (err) {
-//       console.error("Login error:", err.message);
-//       setError(err.message || "An error occurred during login.");
-//     } finally {
-//       setLoginLoading(false);
-//     }
-//   };
-
-//   if (loginLoading || authLoading) return <FullPageSpinner />;
-
-//   return (
-//     <div className={`flex items-center justify-center min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}>
-//       <div className={`w-full max-w-sm p-8 space-y-6 rounded-xl shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
-//         <div className="text-center">
-//             <h1 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-gray-800"}`}>Welcome Back</h1>
-//             <p className={`mt-2 text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>Sign in to continue to MyERP</p>
-//         </div>
-
-//         {error && (
-//           <p className="p-3 text-center bg-red-500/10 text-red-500 text-sm rounded-md">
-//             {error}
-//           </p>
-//         )}
-
-//         <form onSubmit={handleSubmit} className="space-y-4">
-//           <div>
-//             <label className={`block font-medium text-sm mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`} htmlFor="username">
-//               Username
-//             </label>
-//             <input
-//               type="text"
-//               id="username"
-//               name="username"
-//               value={formData.username}
-//               onChange={handleChange}
-//               className={`w-full p-2.5 border rounded-md ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-gray-50 border-gray-300"}`}
-//               required
-//             />
-//           </div>
-
-//           <div>
-//             <label className={`block font-medium text-sm mb-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`} htmlFor="password">
-//               Password
-//             </label>
-//             <input
-//               type="password"
-//               id="password"
-//               name="password"
-//               value={formData.password}
-//               onChange={handleChange}
-//               className={`w-full p-2.5 border rounded-md ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-gray-50 border-gray-300"}`}
-//               required
-//             />
-//           </div>
-
-//           <button type="submit" className="w-full py-2.5 rounded-md font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-200">
-//             Login
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Login;
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -156,7 +57,7 @@ const Login = () => {
 
   return (
     <div className={`flex items-center justify-center min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}>
-      <div className={`w-full max-w-md p-8 space-y-8 rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 ${darkMode ? "bg-gray-800/90 backdrop-blur-md border border-gray-700" : "bg-white/90 backdrop-blur-md border border-gray-200"}`}>
+      <div className={`w-full max-w-md p-8 space-y-8 rounded-md shadow-2xl ${darkMode ? "bg-gray-800/90 backdrop-blur-md border border-gray-700" : "bg-white/90 backdrop-blur-md border border-gray-200"}`}>
         <div className="text-center space-y-2">
           <h1 className={`text-4xl font-extrabold tracking-tight ${darkMode ? "text-white" : "text-gray-900"}`}>Welcome Back</h1>
           <p className={`text-base ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Sign in to access your MyERP dashboard</p>

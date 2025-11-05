@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import AsyncSelect from "react-select/async";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +25,7 @@ import {
 
 // Child Components
 import FullPageSpinner from "./FullPageSpinner.jsx";
+import debounce from "lodash.debounce";
 
 /* --- Helper Functions & Components --- */
 
@@ -133,7 +134,8 @@ const ProductForm = () => {
     returnable: false,
     sellable: true,
     purchasable: true,
-    price: "",
+    sellingPrice: "",
+    costPrice:"",
     description: "",
     category: null,
     inventory: [],
@@ -186,7 +188,8 @@ const ProductForm = () => {
         returnable: !!currentProduct.returnable,
         sellable: currentProduct.sellable ?? true,
         purchasable: currentProduct.purchasable ?? true,
-        price: currentProduct.price || "",
+        sellingPrice: currentProduct.sellingPrice || "",
+        costPrice: currentProduct.costPrice ? Number(Number(currentProduct.costPrice).toPrecision(3)) : "",
         description: currentProduct.description || "",
         category: productCategory,
         inventory: currentProduct.inventory?.map(inv => ({
@@ -222,18 +225,16 @@ const ProductForm = () => {
       ...formData,
       brand: formData.brand?.value || null,
       category: formData.category?.value || null,
-      inventory: formData.inventory.map(inv => ({ location: inv.location?.value, quantity: Number(inv.quantity || 0) })),
-      price: Number(formData.price || 0),
+      inventory: formData.inventory.map(inv => ({ location: inv.location?.value, quantity: isEdit ? Number(inv.quantity || 0) : 0, })),
+      sellingPrice: Number(formData.sellingPrice || 0),
       weight: Number(formData.weight || 0),
     };
 
     try {
       if (isEdit) {
         await dispatch(updateProduct({ id, productData: payload, user })).unwrap();
-        toast.success("Product updated successfully!");
       } else {
         await dispatch(addProduct({ productData: payload, user })).unwrap();
-        toast.success("Product added successfully!");
       }
       navigate("/ims/products");
     } catch (err) {
@@ -242,17 +243,54 @@ const ProductForm = () => {
   };
 
   /* Modal Handlers */
-  const handleAddBrand = async () => { if (!newBrand.name?.trim()) return toast.warn("Brand name required"); try { await dispatch(addBrand({ brandData: newBrand })).unwrap(); setNewBrand({ name: "" }); setShowBrandModal(false); toast.success("Brand added!"); } catch (err) { toast.error(err.message || "Failed to add brand."); } };
-  const handleDeleteBrand = async (bid) => { if (!window.confirm("Archive this brand?")) return; try { await dispatch(deleteBrand({ id: bid })).unwrap(); toast.success("Brand archived."); if (formData.brand?.value === bid) setFormData(prev => ({ ...prev, brand: null })); } catch (err) { toast.error(err.message || "Failed to archive brand."); } };
-  const handleAddCategory = async () => { if (!newCategory.name?.trim()) return toast.warn("Category name required"); try { const res = await dispatch(addCategory({ categoryData: newCategory })).unwrap(); setFormData(prev => ({ ...prev, category: { value: res._id, label: res.name } })); setNewCategory({ name: "", description: "" }); setShowCategoryModal(false); toast.success("Category added and selected!"); } catch (err) { toast.error(err.message || "Failed to add category."); } };
-  const handleDeleteCategory = async (cid) => { if (!window.confirm("Archive this category?")) return; try { await dispatch(deleteCategory({ id: cid })).unwrap(); toast.success("Category archived."); if (formData.category?.value === cid) setFormData(prev => ({ ...prev, category: null })); } catch (err) { toast.error(err.message || "Failed to archive category."); } };
-  const handleAddLocation = async () => { if (!newLocation.name?.trim()) return toast.warn("Location name required"); try { await dispatch(addLocation({ locationData: newLocation })).unwrap(); setNewLocation({ name: "", address: "", notes: "" }); setShowLocationModal(false); toast.success("Location added!"); } catch (err) { toast.error(err.message || "Failed to add location."); } };
-  const handleDeleteLocation = async (lid) => { if (!window.confirm("Archive this location?")) return; try { await dispatch(deleteLocation({ id: lid })).unwrap(); toast.success("Location archived."); setFormData(prev => ({ ...prev, inventory: prev.inventory.map(inv => (inv.location?.value === lid ? { ...inv, location: null } : inv)) })); } catch (err) { toast.error(err.message || "Failed to archive location."); } };
+  const handleAddBrand = async () => { if (!newBrand.name?.trim()) return toast.warn("Brand name required"); try { await dispatch(addBrand({ brandData: newBrand })).unwrap(); setNewBrand({ name: "" }); setShowBrandModal(false)} catch (err) { toast.error(err.message || "Failed to add brand."); } };
+  const handleDeleteBrand = async (bid) => { if (!window.confirm("Archive this brand?")) return; try { await dispatch(deleteBrand({ id: bid })).unwrap(); if (formData.brand?.value === bid) setFormData(prev => ({ ...prev, brand: null })); } catch (err) { toast.error(err.message || "Failed to archive brand."); } };
+  const handleAddCategory = async () => { if (!newCategory.name?.trim()) return toast.warn("Category name required"); try { const res = await dispatch(addCategory({ categoryData: newCategory })).unwrap(); setFormData(prev => ({ ...prev, category: { value: res._id, label: res.name } })); setNewCategory({ name: "", description: "" }); setShowCategoryModal(false); } catch (err) { toast.error(err.message || "Failed to add category."); } };
+  const handleDeleteCategory = async (cid) => { if (!window.confirm("Archive this category?")) return; try { await dispatch(deleteCategory({ id: cid })).unwrap(); if (formData.category?.value === cid) setFormData(prev => ({ ...prev, category: null })); } catch (err) { toast.error(err.message || "Failed to archive category."); } };
+  const handleAddLocation = async () => { if (!newLocation.name?.trim()) return toast.warn("Location name required"); try { await dispatch(addLocation({ locationData: newLocation })).unwrap(); setNewLocation({ name: "", address: "", notes: "" }); setShowLocationModal(false); } catch (err) { toast.error(err.message || "Failed to add location."); } };
+  const handleDeleteLocation = async (lid) => { if (!window.confirm("Archive this location?")) return; try { await dispatch(deleteLocation({ id: lid })).unwrap();  setFormData(prev => ({ ...prev, inventory: prev.inventory.map(inv => (inv.location?.value === lid ? { ...inv, location: null } : inv)) })); } catch (err) { toast.error(err.message || "Failed to archive location."); } };
   
-  /* AsyncSelect Loaders */
-  const loadBrands = (inputValue) => dispatch(fetchBrands({ search: inputValue })).then(r => toOptions(r.payload));
-  const loadCategories = (inputValue) => dispatch(fetchCategories({ search: inputValue })).then(r => toOptions(r.payload));
-  const loadLocations = (inputValue) => dispatch(fetchLocations({ search: inputValue })).then(r => toOptions(r.payload));
+
+
+
+  const loadBrands = useCallback(
+  debounce((inputValue, callback) => {
+    dispatch(fetchBrands({ search: inputValue }))
+      .unwrap()
+      .then(brands => callback(toOptions(brands)))
+      .catch(() => callback([]));
+  }, 400),
+  [dispatch]
+);
+
+
+const loadCategories = useCallback(
+  debounce((inputValue, callback) => {
+    dispatch(fetchCategories({ search: inputValue }))
+      .unwrap()
+      .then(categories => callback(toOptions(categories)))
+      .catch(() => callback([]));
+  }, 400)
+
+, [dispatch])
+  
+const loadLocations = useCallback(
+  debounce( (inputValue, callback) =>{
+    dispatch(fetchLocations({search: inputValue}))
+    .unwrap()
+    .then( locations => callback(toOptions(locations)))
+    .catch( () => callback([]) )
+  } ,300)
+)
+
+
+    useEffect(() => {
+  return () => {
+    loadBrands.cancel();
+    loadCategories.cancel();
+    loadLocations.cancel();
+  };
+}, [loadBrands, loadCategories, loadLocations]);
 
   if (loading && isEdit) return <FullPageSpinner />;
   
@@ -321,9 +359,17 @@ const ProductForm = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block mb-1 font-medium dark:text-gray-300">Price <span className="text-red-500">*</span></label>
-              <input type="number" name="price" value={formData.price} onChange={handleChange} min="0" step="0.01" required className={inputClass} />
+              <label className="block mb-1 font-medium dark:text-gray-300">Selling Price <span className="text-red-500">*</span></label>
+              <input type="number" name="sellingPrice" value={formData.sellingPrice} onChange={handleChange} min="0" step="0.01" required className={inputClass} />
             </div>
+
+
+            <div>
+              <label className="block mb-1 font-medium dark:text-gray-300">costPrice <span className="text-red-500">*</span></label>
+              <input type="number" name="costPrice" value={formData.costPrice} disabled className={inputClass} />
+            </div>
+
+
             <div>
               <label className="block mb-1 font-medium dark:text-gray-300">Unit</label>
               <select name="unit" value={formData.unit} onChange={handleChange} className={inputClass}>
@@ -351,7 +397,8 @@ const ProductForm = () => {
                 <div className="w-full sm:flex-grow">
                   <AsyncSelect cacheOptions defaultOptions={toOptions(locations)} loadOptions={loadLocations} value={inv.location} onChange={(v) => handleInventoryChange(idx, "location", v)} placeholder="Select location..." styles={selectStyles} />
                 </div>
-                <input type="number" min="0" placeholder="Quantity" value={inv.quantity} onChange={(e) => handleInventoryChange(idx, "quantity", e.target.value)} className={`${inputClass} w-full sm:w-32`} />
+                
+                <input disabled={!isEdit} type="number" min="0" placeholder="Quantity can only be changed by issuing or purchasing stock" value={inv.quantity} onChange={(e) => handleInventoryChange(idx, "quantity", e.target.value)} className={`${inputClass} w-full sm:w-32`} />
                 <button type="button" onClick={() => removeInventoryEntry(idx)} className="w-full sm:w-auto px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md font-semibold transition-colors">Remove</button>
               </div>
             ))}

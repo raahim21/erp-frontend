@@ -261,8 +261,8 @@ const ProductList = () => {
                         darkMode ? "hover:bg-gray-700/50" : "hover:bg-gray-50/80"
                       }`}
                     >
-                      <td className={`p-3 align-middle font-semibold ${darkMode ? "text-gray-200" : "text-gray-800"}`}>{product.name}</td>
-                      <td className={`p-3 align-middle ${darkMode ? "text-gray-400" : "text-gray-600"}`}>${product.price || 0}</td>
+                      <td className={`p-3 align-middle font-semibold ${darkMode ? "text-gray-200" : "text-gray-800"}`}>{product.name}</td>  
+                      <td className={`p-3 align-middle ${darkMode ? "text-gray-400" : "text-gray-600"}`}>${product.sellingPrice || 0}</td>
                       <td className={`p-3 align-middle font-bold ${getStockColorClass(totalQuantity)}`}>
                         {totalQuantity}
                       </td>
