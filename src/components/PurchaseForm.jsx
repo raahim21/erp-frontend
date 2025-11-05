@@ -204,7 +204,13 @@ const PurchaseForm = () => {
     e.preventDefault();
 
     if (!formData.productId?.value) return toast.error("Product is required.");
-    if(!formData.unitPrice && formData.type=='Vendor' || formData.type=='Internal' || parseInt(formData.unitPrice) < 1) return toast.warn('unitPrice cannot be 0 or empty')
+    if (
+  (!formData.unitPrice || parseInt(formData.unitPrice) < 1) &&
+  (formData.type === 'Vendor' || formData.type === 'Internal')
+) {
+  return toast.warn('unitPrice cannot be 0 or empty');
+}
+
     if (!formData.quantity || parseInt(formData.quantity) <= 0) return toast.error("Quantity must be a positive number.");
     
     switch (formData.type) {
