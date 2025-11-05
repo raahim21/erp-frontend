@@ -10,7 +10,7 @@ import {
   setSearchTerm,
 } from "../Slices/CustomerSlice.jsx";
 import Spinner from "../components/Spinner.jsx";
-import Pagination from "../components/pagination.jsx";
+import Pagination from "../components/Pagination.jsx";
 import useDebounce from "../../utils/useDebounce.js";
 
 // --- Icon Components ---
